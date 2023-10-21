@@ -3,8 +3,10 @@ package com.omkar.usermanagement.usermanage.Config;
 
 import com.omkar.usermanagement.usermanage.Model.User;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 public class CustomUserDetails implements UserDetails {
@@ -15,7 +17,9 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-      return null;
+
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority(user.getRole());
+        return Arrays.asList(authority);
     }
 
     @Override

@@ -6,17 +6,19 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractAuthenticationFilterConfigurer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @Configuration
 @EnableWebSecurity
 public class Securityconfig {
 @Bean
-public PasswordEncoder encoder (){return new BCryptPasswordEncoder(10);
+public PasswordEncoder encoder (){return new BCryptPasswordEncoder();
 }
 @Bean
 public UserDetailsService userdetailsService (){
@@ -35,16 +37,14 @@ public UserDetailsService userdetailsService (){
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(String.valueOf(PathRequest.toStaticResources().atCommonLocations())).permitAll() // Allow access to static resources
-                        .requestMatchers("/login", "/signup").permitAll() // Permit access to login and signup
-                        .requestMatchers("/admin/**").hasRole("ADMIN") // Require ADMIN role for /admin/**
+                .authorizeHttpRequests(authorize -> authorize// Allow access to static resources
+                        .requestMatchers("signin", "signup").permitAll() // Permit access to login and signup
+                        .requestMatchers("/admin/**").hasAnyRole("ADMIN")
+                        .requestMatchers("/user/**").hasAnyRole("USER")// Require ADMIN role for /admin/**
                         .anyRequest().authenticated() // Require authentication for all other requests
                 )
                 .csrf(AbstractHttpConfigurer::disable)
-                .formLogin(formLogin -> formLogin
-                        .loginPage("/login") // Specify the login page URL
-                        .permitAll()
+                .formLogin(formlogin-> formlogin.defaultSuccessUrl("/home")
                 );
 
         return http.build();

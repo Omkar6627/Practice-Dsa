@@ -1,10 +1,13 @@
 package com.omkar.usermanagement.usermanage.Service;
 
+import com.omkar.usermanagement.usermanage.Model.SignInInput;
+import com.omkar.usermanagement.usermanage.Model.SignUpOutput;
 import com.omkar.usermanagement.usermanage.Model.User;
 import com.omkar.usermanagement.usermanage.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,6 +29,10 @@ public class UserService {
          return userRepository.findByUsername(username);
      
     }
+    public BCryptPasswordEncoder PasswordEncrypter(){
+        return new BCryptPasswordEncoder();
+    }
+
 
     public User getUserById(Long userId) {
         Optional<User> user = userRepository.findById(userId);
@@ -40,10 +47,45 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public void registerUser(User user) {
-        // Implement user registration logic
-        // You can save the user entity directly since the ID will be auto-generated
-        userRepository.save(user);
+    public SignUpOutput registerUser(User user) {
+        boolean signUpStatus = true;
+        String signUpStatusMessage = null;
+
+        String newEmail = user.getEmail();
+
+        if(newEmail == null)
+        {
+            signUpStatusMessage = "Invalid email";
+            signUpStatus = false;
+            return new SignUpOutput(signUpStatus,signUpStatusMessage);
+        }
+
+
+        User existingUser = userRepository.findFirstByEmail(newEmail);
+
+        if(existingUser != null)
+        {
+            signUpStatusMessage = "Email already registered!!!";
+            signUpStatus = false;
+            return new SignUpOutput(signUpStatus,signUpStatusMessage);
+        }
+
+
+        try {
+            String encryptedPassword = PasswordEncrypter().encode(user.getPassword());
+
+
+            user.setPassword(encryptedPassword);
+            userRepository.save(user);
+
+            return new SignUpOutput(signUpStatus, "User registered successfully!!!");
+        }
+        catch(Exception e)
+        {
+            signUpStatusMessage = "Internal error occurred during sign up";
+            signUpStatus = false;
+            return new SignUpOutput(signUpStatus,signUpStatusMessage);
+        }
     }
 
 
@@ -76,5 +118,50 @@ public class UserService {
 
     public User findByEmail(String email) {
         return userRepository.findFirstByEmail(email);
+    }
+
+    public String signInUser(SignInInput signInInput) {
+        String signtusMessage = null;
+
+        String signInEmail = signInInput.getEmail();
+
+        if(signInEmail == null)
+        {
+            signtusMessage = "Invalid email";
+            return signtusMessage;
+
+
+        }
+
+
+        User existingUser = userRepository.findFirstByEmail(signInEmail);
+
+        if(existingUser == null)
+        {
+            signtusMessage = "Email not registered!!!";
+            return signtusMessage;
+
+        }
+
+
+        try {
+            String encryptedPassword = PasswordEncrypter().encode(signInInput.getPassword());
+            if(existingUser.getPassword().equals(encryptedPassword))
+            {
+
+
+
+                return "kitne baar sign in krega";
+            }
+            else {
+                signtusMessage = "Invalid credentials!!!";
+                return signtusMessage;
+            }
+        }
+        catch(Exception e)
+        {
+            signtusMessage = "Internal error occurred during sign in";
+            return signtusMessage;
+        }
     }
 }
