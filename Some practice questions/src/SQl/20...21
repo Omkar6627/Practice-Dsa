@@ -1,0 +1,44 @@
+-- Online SQL Editor to Run SQL Online.
+-- Use the editor to create new tables, insert data and all other SQL operations.
+create table subject( ID int primary key,
+    phy INT,
+    chem INT,
+    maths INT) ;
+alter table subject
+add bio INT;
+INSERT INTO subject (ID, Phy, Chem, Maths, Bio)
+VALUES (1, 85, 90, 78, 92);
+
+INSERT INTO subject (ID, Phy, Chem, Maths, Bio)
+VALUES (2, 75, 88, 92, 85);
+
+INSERT INTO subject (ID, Phy, Chem, Maths, Bio)
+VALUES (3, 92, 80, 89, 75);
+
+SELECT ID
+FROM subject
+WHERE Phy = (SELECT MAX(Phy) FROM subject);
+
+SELECT ID
+FROM subject
+WHERE (phy + chem + math + bio) = (SELECT MAX(phy + chem + math + bio) FROM subject);
+
+
+SELECT ID, Phy, Chem, Maths, bio, (Phy + Chem + Maths + bio) AS TotalScore
+FROM subject
+ORDER BY TotalScore ASC;
+
+SELECT ID, Maths
+FROM subject
+ORDER BY Maths DESC
+LIMIT 1 OFFSET 1;
+
+
+
+
+
+
+
+
+INSERT INTO subject (ID, Phy, Chem, Maths, Bio)
+VALUES (4, 78, 95, 87, 80);
