@@ -19,6 +19,8 @@ import lombok.AllArgsConstructor;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @NotBlank(message = "Username is required")
     private String username;
 
